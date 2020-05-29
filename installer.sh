@@ -2,7 +2,7 @@
 . functions.sh
 . settings.sh
 while [ ! "$main" == "00" ] ; do
-main=$(MENU="Main Menu" menu \
+main=$(MENU="Main Menu - Elsa Installer" menu \
 	01 "Disk_Menu" \
 	02 "Install_Sulin" \
 	03 "Remaster_Sulin" \
