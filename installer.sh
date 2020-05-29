@@ -34,7 +34,7 @@ case "$main" in
 				umount -lf /mnt/${part}
 			elif [ "$diskmenu" == "04" ] ; then
 				part=$(DISK=$disk MENU="Select Partition for Format" getmount)
-				mkfs.ext4 /dev/$part
+				TITLE="Format: /dev/$part" CMD="mkfs.ext4 /dev/$part" run
 			fi
 
 		done
