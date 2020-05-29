@@ -25,7 +25,7 @@ copy(){
 	$dialog --prgbox "Copying. Please Wait" "cp -prfv \"$1\" \"$2\" | sed 's/ -> .*//g' ; sync ; echo 'Press enter to continue'" 1000 1000 2>&1 1>&3
 }
 run(){
-	$CMD | $dialog --programbox "$TITLE" 1000 1000 2>&1 1>&3
+	$dialog --programbox "$TITLE" 1000 1000 2>&1 1>&3
 }
 prepare_disk(){
 	for line in $* ; do

@@ -36,7 +36,7 @@ case "$main" in
 				part=$(DISK=$disk MENU="Select Partition for Format" getpart)
 				umount -lf /dev/$part
 				if  MSG="Do you wanna format /dev/$part as ext4?" promt ; then
-					TITLE="Format: /dev/$part" CMD="yes | mkfs.ext4 /dev/$part" run
+					TITLE="Format: /dev/$part" yes | mkfs.ext4 /dev/$part | run
 				fi
 			fi
 
