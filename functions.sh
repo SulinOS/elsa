@@ -22,7 +22,7 @@ getfile(){
 	$dialog --fselect "$1" 14 48 2>&1 1>&3
 }
 copy(){
-	$dialog --prgbox "Copying. Please Wait" "cp -prfv \"$1\" \"$2\" | sed 's/ -> .*//g' ; echo 'Press enter to continue'" 0 0 2>&1 1>&3
+	$dialog --prgbox "Copying. Please Wait" "cp -prfv \"$1\" \"$2\" | sed 's/ -> .*//g' ; sync ; echo 'Press enter to continue'" 1000 1000 2>&1 1>&3
 }
 run(){
 	$CMD | $dialog --programbox "$TITLE" 0 0 2>&1 1>&3

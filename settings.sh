@@ -1,2 +1,2 @@
-SFSFILE="/data/user/sulin/main.sfs"
+SFSFILE="/dev/loop0"
 dialog="dialog"

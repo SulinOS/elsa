@@ -21,6 +21,7 @@ case "$main" in
 				01 "Edit" \
 				02 "Mount" \
 				03 "Umount" \
+				04 "Format" \
 				00 "Return")
 			[ "$diskmenu" == "01" ] && cfdisk /dev/${disk}
 			if [ "$diskmenu" == "02" ] ; then
@@ -31,6 +32,9 @@ case "$main" in
 			elif [ "$diskmenu" == "03" ] ; then
 				part=$(DISK=$disk MENU="Select Mounted Partition" getmount)
 				umount -lf /mnt/${part}
+			elif [ "$diskmenu" == "04" ] ; then
+				part=$(DISK=$disk MENU="Select Partition for Format" getmount)
+				mkfs.ext4 /dev/$part
 			fi
 
 		done
@@ -52,42 +56,42 @@ case "$main" in
 			elif [ "$inmenu" == "02" ] ; then
 				export source=$(getfile "/")
 			elif [ "$inmenu" == "03" ] ; then
-				if [ -f "$source" ] && [ "$target" != "" ] ; then
-					mkdir -p /mnt/target
+				if [ -f "$source" ] || [ -b "$source" ] && [ "$target" != "" ] ; then
+					mkdir -p /mnt/$target
 					mkdir -p /mnt/source
 					umount -fl  /mnt/source/ || true
 					mount $source /mnt/source
-					copy "/mnt/source/*" "/mnt/target/" || exit
-					mkdir -p /mnt/target/dev
-					mkdir -p /mnt/target/sys
-					mkdir -p /mnt/target/proc
-					mkdir -p /mnt/target/run
-					mount --bind /dev "/mnt/target/dev"
-					mount --bind /sys "/mnt/target/sys"
-					mount --bind /sys "/mnt/target/proc"
-					mount --bind /sys "/mnt/target/run"
+					copy "/mnt/source/*" "/mnt/$target/" || exit
+					mkdir -p /mnt/$target/dev
+					mkdir -p /mnt/$target/sys
+					mkdir -p /mnt/$target/proc
+					mkdir -p /mnt/$target/run
+					mount --bind /dev "/mnt/$target/dev"
+					mount --bind /sys "/mnt/$target/sys"
+					mount --bind /sys "/mnt/$target/proc"
+					mount --bind /sys "/mnt/$target/run"
 					pass=""
 					pass2=""
-					if [ ! -f "/mnt/target/usr/bin/useradd" ] ; then
+					if [ ! -f "/mnt/$target/usr/bin/useradd" ] ; then
 						MSG="Unable to connect target filesystem" msg
 					else
 						while [ "$pass"	!= "$pass2" ] || [ "$pass" == "" ] || [ "$pass2" == "" ]; do
 								pass=$(MSG="New password for root:" input)
 								pass2=$(MSG="Type again new password for root:" input)
 						done
-						echo -e "$pass\n$pass2" | chroot /mnt/target/ passwd "$user"
+						echo -e "$pass\n$pass2" | chroot /mnt/$target/ passwd "$user"
 					fi
 				else
 					MSG="Missing Value\n\nTarget=$target\nSource=$source" msg
 				fi
 			elif [ "$inmenu" == "04" ] ; then
 				status=1
-				if [ ! -f "/mnt/target/usr/bin/useradd" ] ; then
+				if [ ! -f "/mnt/$target/usr/bin/useradd" ] ; then
 					MSG="Unable to connect target filesystem" msg
 				else
-					while MSG="Do you wanna add new user?\nCurrent Users:\n    $(ls /mnt/target/data/user)" promt && [ "$status" != "0" ]; do
+					while MSG="Do you wanna add new user?" promt && [ "$status" != "0" ]; do
 						user=$(MSG="New user Name:" input)
-						chroot /mnt/target/ useradd -d "/data/user/$user" -m -g users -s "/bin/bash" "$user"
+						chroot /mnt/$target/ useradd -d "/data/user/$user" -m -g users -s "/bin/bash" "$user"
 						status=$?
 						if [ "$status" != "0" ] ; then
 							MSG="User cannot create $user ($status)" msg
@@ -98,24 +102,24 @@ case "$main" in
 							pass=$(MSG="New password for $user:" input)
 								pass2=$(MSG="Type again new password for $user:" input)
 							done
-							mkdir -p "/mnt/target/data/app/$user"
-							chown "$user" "/mnt/target/data/app/$user"
-							echo -e "$pass\n$pass2" | chroot /mnt/target/ passwd "$user"
+							mkdir -p "/mnt/$target/data/app/$user"
+							chown "$user" "/mnt/$target/data/app/$user"
+							echo -e "$pass\n$pass2" | chroot /mnt/$target/ passwd "$user"
 						fi
 					done
 				fi
 			elif [ "$inmenu" == "05" ] ; then
-				if [ ! -f "/mnt/target/sbin/grub-install" ] ; then
+				if [ ! -f "/mnt/$target/sbin/grub-install" ] ; then
 					MSG="Unable to connect target filesystem" msg
 				elif  MSG="Do you wanna install bootloader?" promt ; then
 					disk=""
 					while [ "$disk" == "" ] ; do					
 						disk=$(MENU="Select grub disk" getdisk)
-						MSG="Installing bootloader..." info
-						chroot /mnt/target grub-install /dev/$disk || MSG="Unable to install bootloader on /dev/$disk" msg
-						MSG="Generating grub.cfg" info
-						chroot /mnt/target grub-mkconfig > /mnt/target/boot/grub/grub.cfg
 					done
+					MSG="Installing bootloader..." info
+					chroot /mnt/$target grub-install /dev/$disk || MSG="Unable to install bootloader on /dev/$disk" msg
+					MSG="Generating grub.cfg" info
+					chroot /mnt/$target update-grub
 				fi
 			else
 				echo ""
