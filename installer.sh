@@ -75,7 +75,7 @@ case "$main" in
 					mount --bind /sys "/mnt/$target/run"
 					pass=""
 					pass2=""
-					if [ ! -f "/mnt/$target/usr/bin/useradd" ] ; then
+					if [ ! -f "/mnt/$target/usr/sbin/useradd" ] ; then
 						MSG="Unable to connect target filesystem" msg
 					else
 						while [ "$pass"	!= "$pass2" ] || [ "$pass" == "" ] || [ "$pass2" == "" ]; do
@@ -89,7 +89,7 @@ case "$main" in
 				fi
 			elif [ "$inmenu" == "04" ] ; then
 				status=1
-				if [ ! -f "/mnt/$target/usr/bin/useradd" ] ; then
+				if [ ! -f "/mnt/$target/usr/sbin/useradd" ] ; then
 					MSG="Unable to connect target filesystem" msg
 				else
 					while MSG="Do you wanna add new user?" promt && [ "$status" != "0" ]; do
