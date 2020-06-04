@@ -120,6 +120,14 @@ case "$main" in
 						disk=$(MENU="Select grub disk" getdisk)
 					done
 					MSG="Installing bootloader..." info
+					if [ -d /sys/firmware/efi ] ; then
+						efidisk=""
+						while [ "$efidisk" == "" ] ; do				
+							efidisk=$(MENU="Select efi partition" DISK="$disk" getpart)
+						done
+						mkdir -p /mnt/$target/boot/efi || true
+						mount $efidisk /mnt/$target/boot/efi
+					fi
 					chroot /mnt/$target grub-install /dev/$disk || MSG="Unable to install bootloader on /dev/$disk" msg
 					MSG="Generating grub.cfg" info
 					chroot /mnt/$target update-grub
@@ -151,9 +159,11 @@ case "$main" in
 					mkdir -p $workdir/isowork/boot/grub
 				elif [ "$remenu" == "03" ] ; then
 					initrd=""
-					vmlinuz=""
-					while [ ! -f "$targetdir/boot/$initrd" ] || [ ! -f "$targetdir/boot/$vmlinuz" ] ; do
+					while [ ! -f "$targetdir/boot/$initrd" ] ; do
 						initrd=$( MSG="Input initrd name:\n$(ls $targetdir/boot | grep initrd)" input)
+					done
+					vmlinuz=""
+					while [ ! -f "$targetdir/boot/$vmlinuz" ] ; do
 						vmlinuz=$(MSG="Input kernel name:\n$(ls $targetdir/boot | grep linux)" input)
 					done
 				elif [ "$remenu" == "04" ] ; then
@@ -161,6 +171,7 @@ case "$main" in
 						MSG="Missing values\n\nInitrd=$initrd\nVmlinuz=$vmlinuz\nWorkdir=$workdir\nTarget=$targetdir" msg
 					else
 						clear
+						umount -R -lf $targetdir/* 2>/dev/null
 						mksquashfs $targetdir $workdir/isowork/main.sfs -comp xz -wildcards
 						cp $targetdir/boot/$(vmlinuz) $workdir/isowork/vmlinuz
 						cp $targetdir/boot/$(initrd) $workdir/isowork/initrd
