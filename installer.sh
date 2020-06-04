@@ -122,11 +122,11 @@ case "$main" in
 					MSG="Installing bootloader..." info
 					if [ -d /sys/firmware/efi ] ; then
 						efidisk=""
-						while [ "$efidisk" == "" ] ; do				
+						while [ "$efidisk" == "" ] ; do		
 							efidisk=$(MENU="Select efi partition" DISK="$disk" getpart)
 						done
 						mkdir -p /mnt/$target/boot/efi || true
-						mount $efidisk /mnt/$target/boot/efi
+						mount /dev/$efidisk /mnt/$target/boot/efi
 					fi
 					chroot /mnt/$target grub-install /dev/$disk || MSG="Unable to install bootloader on /dev/$disk" msg
 					MSG="Generating grub.cfg" info
