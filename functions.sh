@@ -29,7 +29,8 @@ getfile(){
 	$dialog --fselect "$1" 14 48 2>&1 1>&3
 }
 copy(){
-	$dialog --prgbox "Copying. Please Wait" "cp -prfv \"$1\" \"$2\" | sed 's/ -> .*//g' ; sync ; echo 'Press enter to continue'" 1000 1000 2>&1 1>&3
+        rsync -avh --no-i-r --no-D "$1" "$2" | awk '{print $3}' | grep "%" | sed "s/.$//" | $dialog --gauge "Please wait" 10 70 0
+	#$dialog --prgbox "Copying. Please Wait" "cp -prfv \"$1\" \"$2\" | sed 's/ -> .*//g' ; sync ; echo 'Press enter to continue'" 1000 1000 2>&1 1>&3
 }
 run(){
 	$dialog --programbox "$TITLE" 1000 1000 2>&1 1>&3
