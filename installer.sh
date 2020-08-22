@@ -64,7 +64,7 @@ case "$main" in
 					mkdir -p /esla/source
 					umount -fl  /esla/source/ || true
 					mount $source /esla/source
-					copy "/esla/source/*" "/esla/$target/" || exit
+					copy "/esla/source/" "/esla/$target/" || exit
 					mkdir -p /esla/$target/dev
 					mkdir -p /esla/$target/sys
 					mkdir -p /esla/$target/proc
@@ -75,6 +75,7 @@ case "$main" in
 					mount --bind /sys "/esla/$target/run"
 					pass=""
 					pass2=""
+					read -n 1
 					if [ ! -f "/esla/$target/usr/sbin/useradd" ] ; then
 						MSG="Unable to connect target filesystem" msg
 					else
