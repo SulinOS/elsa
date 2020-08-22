@@ -1,6 +1,6 @@
 #!/bin/bash
-. functions.sh
 . settings.sh
+. functions.sh
 while [ ! "$main" == "00" ] ; do
 main=$(MENU="Main Menu - Elsa Installer" menu \
 	01 "Disk_Menu" \
@@ -26,12 +26,12 @@ case "$main" in
 			[ "$diskmenu" == "01" ] && cfdisk /dev/${disk}
 			if [ "$diskmenu" == "02" ] ; then
 				part=$(DISK=$disk MENU="Select Partition" getpart)
-				umount -lf /mnt/${part} || true
-				mkdir -p /mnt/${part} || true
-				mount /dev/${part} /mnt/${part}
+				umount -lf /esla/${part} || true
+				mkdir -p /esla/${part} || true
+				mount /dev/${part} /esla/${part}
 			elif [ "$diskmenu" == "03" ] ; then
 				part=$(DISK=$disk MENU="Select Mounted Partition" getmount)
-				umount -lf /mnt/${part}
+				umount -lf /esla/${part}
 			elif [ "$diskmenu" == "04" ] ; then
 				part=$(DISK=$disk MENU="Select Partition for Format" getpart)
 				umount -lf /dev/$part
@@ -60,41 +60,41 @@ case "$main" in
 				export source=$(getfile "/")
 			elif [ "$inmenu" == "03" ] ; then
 				if [ -f "$source" ] || [ -b "$source" ] && [ "$target" != "" ] ; then
-					mkdir -p /mnt/$target
-					mkdir -p /mnt/source
-					umount -fl  /mnt/source/ || true
-					mount $source /mnt/source
-					copy "/mnt/source/*" "/mnt/$target/" || exit
-					mkdir -p /mnt/$target/dev
-					mkdir -p /mnt/$target/sys
-					mkdir -p /mnt/$target/proc
-					mkdir -p /mnt/$target/run
-					mount --bind /dev "/mnt/$target/dev"
-					mount --bind /sys "/mnt/$target/sys"
-					mount --bind /sys "/mnt/$target/proc"
-					mount --bind /sys "/mnt/$target/run"
+					mkdir -p /esla/$target
+					mkdir -p /esla/source
+					umount -fl  /esla/source/ || true
+					mount $source /esla/source
+					copy "/esla/source/*" "/esla/$target/" || exit
+					mkdir -p /esla/$target/dev
+					mkdir -p /esla/$target/sys
+					mkdir -p /esla/$target/proc
+					mkdir -p /esla/$target/run
+					mount --bind /dev "/esla/$target/dev"
+					mount --bind /sys "/esla/$target/sys"
+					mount --bind /sys "/esla/$target/proc"
+					mount --bind /sys "/esla/$target/run"
 					pass=""
 					pass2=""
-					if [ ! -f "/mnt/$target/usr/sbin/useradd" ] ; then
+					if [ ! -f "/esla/$target/usr/sbin/useradd" ] ; then
 						MSG="Unable to connect target filesystem" msg
 					else
 						while [ "$pass"	!= "$pass2" ] || [ "$pass" == "" ] || [ "$pass2" == "" ]; do
 								pass=$(MSG="New password for root:" input)
 								pass2=$(MSG="Type again new password for root:" input)
 						done
-						echo -e "$pass\n$pass2" | chroot /mnt/$target/ passwd "$user"
+						echo -e "$pass\n$pass2" | chroot /esla/$target/ passwd "$user"
 					fi
 				else
 					MSG="Missing Value\n\nTarget=$target\nSource=$source" msg
 				fi
 			elif [ "$inmenu" == "04" ] ; then
 				status=1
-				if [ ! -f "/mnt/$target/usr/sbin/useradd" ] ; then
+				if [ ! -f "/esla/$target/usr/sbin/useradd" ] ; then
 					MSG="Unable to connect target filesystem" msg
 				else
 					while MSG="Do you wanna add new user?" promt && [ "$status" != "0" ]; do
 						user=$(MSG="New user Name:" input)
-						chroot /mnt/$target/ useradd -d "/data/user/$user" -m -g users -s "/bin/bash" "$user"
+						chroot /esla/$target/ useradd -d "/data/user/$user" -m -g users -s "/bin/bash" "$user"
 						status=$?
 						if [ "$status" != "0" ] ; then
 							MSG="User cannot create $user ($status)" msg
@@ -105,14 +105,14 @@ case "$main" in
 							pass=$(MSG="New password for $user:" input)
 								pass2=$(MSG="Type again new password for $user:" input)
 							done
-							mkdir -p "/mnt/$target/data/app/$user"
-							chown "$user" "/mnt/$target/data/app/$user"
-							echo -e "$pass\n$pass2" | chroot /mnt/$target/ passwd "$user"
+							mkdir -p "/esla/$target/data/app/$user"
+							chown "$user" "/esla/$target/data/app/$user"
+							echo -e "$pass\n$pass2" | chroot /esla/$target/ passwd "$user"
 						fi
 					done
 				fi
 			elif [ "$inmenu" == "05" ] ; then
-				if [ ! -f "/mnt/$target/sbin/grub-install" ] ; then
+				if [ ! -f "/esla/$target/sbin/grub-install" ] ; then
 					MSG="Unable to connect target filesystem" msg
 				elif  MSG="Do you wanna install bootloader?" promt ; then
 					disk=""
@@ -125,12 +125,12 @@ case "$main" in
 						while [ "$efidisk" == "" ] ; do		
 							efidisk=$(MENU="Select efi partition" DISK="$disk" getpart)
 						done
-						mkdir -p /mnt/$target/boot/efi || true
-						mount /dev/$efidisk /mnt/$target/boot/efi
+						mkdir -p /esla/$target/boot/efi || true
+						mount /dev/$efidisk /esla/$target/boot/efi
 					fi
-					chroot /mnt/$target grub-install /dev/$disk || MSG="Unable to install bootloader on /dev/$disk" msg
+					chroot /esla/$target grub-install /dev/$disk || MSG="Unable to install bootloader on /dev/$disk" msg
 					MSG="Generating grub.cfg" info
-					chroot /mnt/$target update-grub
+					chroot /esla/$target update-grub
 				fi
 			else
 				echo ""
@@ -189,7 +189,7 @@ case "$main" in
 		;;
 	00)
 		sync
-		umount -lf -R /mnt/* 2/>dev/null
+		umount -lf -R /esla/* 2/>dev/null
 		clear
 		exit
 		;;

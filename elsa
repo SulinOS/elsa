@@ -1,0 +1,3 @@
+#!/bin/bash
+cd /usr/lib/elsa/
+exec bash installer.sh

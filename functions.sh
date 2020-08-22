@@ -1,4 +1,11 @@
+if ! which $dialog 2> /dev/null ; then
+    echo "$dialog not found."
+    exit 1
+fi
 exec 3>&1
+ifw(){
+[ -z $1 ] || echo $2 $3
+}
 promt(){
 	$dialog --yesno "$MSG" 0 0 2>&1 1>&3
 }
