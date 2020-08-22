@@ -75,7 +75,6 @@ case "$main" in
 					mount --bind /sys "/elsa/$target/run"
 					pass=""
 					pass2=""
-					read -n 1
 					if [ ! -f "/elsa/$target/usr/sbin/useradd" ] ; then
 						MSG="Unable to connect target filesystem" msg
 					else
