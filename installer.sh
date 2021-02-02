@@ -19,25 +19,26 @@ case "$main" in
 		while [ ! "$diskmenu" == "00" ] ; do
 			diskmenu=$(MENU="Disk Menu (/dev/$disk)" menu \
 				01 "Edit" \
-				02 "Mount" \
-				03 "Umount" \
-				04 "Format" \
+				02 "Format" \
+				03 "Mount" \
+				04 "Umount" \
 				00 "Return")
 			[ "$diskmenu" == "01" ] && cfdisk /dev/${disk}
 			if [ "$diskmenu" == "02" ] ; then
-				part=$(DISK=$disk MENU="Select Partition" getpart)
-				umount -lf /elsa/${part} || true
-				mkdir -p /elsa/${part} || true
-				mount /dev/${part} /elsa/${part}
-			elif [ "$diskmenu" == "03" ] ; then
-				part=$(DISK=$disk MENU="Select Mounted Partition" getmount)
-				umount -lf /elsa/${part}
-			elif [ "$diskmenu" == "04" ] ; then
 				part=$(DISK=$disk MENU="Select Partition for Format" getpart)
 				umount -lf /dev/$part
 				if  MSG="Do you wanna format /dev/$part as ext4?" promt ; then
 					TITLE="Format: /dev/$part" yes | mkfs.ext4 /dev/$part | run
 				fi
+			elif [ "$diskmenu" == "03" ] ; then
+				part=$(DISK=$disk MENU="Select Partition" getpart)
+				umount -lf /elsa/${part} || true
+				mkdir -p /elsa/${part} || true
+				mount /dev/${part} /elsa/${part}
+			elif [ "$diskmenu" == "04" ] ; then
+				part=$(DISK=$disk MENU="Select Mounted Partition" getmount)
+				umount -lf /elsa/${part}
+			
 			fi
 
 		done
@@ -78,7 +79,7 @@ case "$main" in
 					if [ ! -f "/elsa/$target/usr/sbin/useradd" ] ; then
 						MSG="Unable to connect target filesystem" msg
 					else
-						while [ "$pass"	!= "$pass2" ] || [ "$pass" == "" ] || [ "$pass2" == "" ]; do
+						while [ "$pass" != "$pass2" ] || [ "$pass" == "" ] || [ "$pass2" == "" ]; do
 								pass=$(MSG="New password for root:" input)
 								pass2=$(MSG="Type again new password for root:" input)
 						done
